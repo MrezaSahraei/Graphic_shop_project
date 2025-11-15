@@ -1,0 +1,14 @@
+{% extends 'parent/base.html' %}
+
+{% block title %}ورود با شماره موبایل{% endblock %}
+    {% for message in messages %}
+        {{ message.success }}
+    {% endfor %}
+{% block content %}
+    <form method="POST">
+    {{ form.as_p }}
+        {% csrf_token %}
+        <input type="submit" value="enter">
+        </form>
+
+{% endblock %}

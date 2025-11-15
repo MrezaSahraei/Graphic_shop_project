@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="fa">
+{% extends 'parent/base.html' %}
+{% load static %}
+{% block title %}لیست محصولات{% endblock %}
+
+{% block content %}
+<div class="sidebar">
+
+    <!-- دکمه کنترل کننده Collapse -->
+    <a href="#product-filters"
+       class="h4 mb-3 d-flex align-items-center text-decoration-none"
+       data-toggle="collapse"
+       role="button"
+       aria-expanded="false"
+       aria-controls="product-filters">
+
+        <!-- آیکون فیلتر -->
+        <i class="fas fa-filter mr-2" style="font-size: 1.25rem;"></i>
+
+        <!-- متن عنوان -->
+        جستجو و فیلتر
+
+        <!-- آیکون فلش (برای نشان دادن حالت باز/بسته) -->
+        <i class="fas fa-chevron-down float-left mr-auto"></i>
+
+    </a>
+
+    <!-- محتوای فیلترها (در حالت پیش‌فرض بسته است به خاطر کلاس collapse) -->
+    <div class="collapse" id="product-filters">
+
+        <form method="GET" action="{% url 'shop:product_list' %}">
+
+            <!-- فیلتر سازنده -->
+            <div class="mb-3">
+                <label for="manufacturer-select" class="form-label">شرکت سازنده:</label>
+                <select name="manufacturer" id="manufacturer-select" class="form-control">
+                    <option value="">همه </option>
+                    {% for code, label in manufacturer_choices %}
+                        <option value="{{ code }}"
+                            {% if code == selected_manufacturer %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- فیلتر مقدار حافظه (GB) -->
+            <div class="mb-3">
+                <label for="memory-select" class="form-label">مقدار حافظه (GB):</label>
+                <select name="memory" id="memory-select" class="form-control">
+                    <option value="">همه</option>
+                    {% for memory_val in available_memory %}
+                        <option value="{{ memory_val }}"
+                            {% if memory_val|safe == selected_memory|safe %}selected{% endif %}>
+                            {{ memory_val }} GB
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- فیلتر رزولوشن پیشنهادی -->
+            <div class="mb-3">
+                <label for="resolution-choices" class="form-label">رزولوشن پیشنهادی:</label>
+                <select name="resolution" id="resolution-choices" class="form-control">
+                    <option value="">همه </option>
+                    {% for code, label in resolution_choices %}
+                        <option value="{{ code }}"
+                            {% if code == selected_resolution %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- فیلتر نسخه اسلات PCIe -->
+            <div class="mb-3">
+                <label for="interface-choices" class="form-label">نسخه اسلات PCIe (برای سازگاری با مادربرد)</label>
+                <select name="interface" id="interface-choices" class="form-control">
+                    <option value="">همه </option>
+                    {% for code, label in interface_choices %}
+                        <option value="{{ code }}"
+                            {% if code == selected_interface %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- دکمه‌های اقدام -->
+            <button type="submit" class="btn btn-primary btn-block mt-3">فیلتر کن</button>
+
+            {% if selected_manufacturer or selected_memory %}
+                <a href="{% url 'shop:product_list' %}" class="btn btn-outline-secondary btn-block mt-2">حذف فیلترها</a>
+            {% endif %}
+
+        </form>
+    </div>
+</div>
+
+
+			<div role="main" class="main shop py-4">
+
+				<div class="container">
+					<div class="masonry-loader masonry-loader-showing">
+
+						<div class="row products product-thumb-info-list" data-plugin-masonry data-plugin-options="{'layoutMode': 'fitRows'}">
+                            {% for product in products %}
+							<div class="col-12 col-sm-6 col-lg-3 product">
+								<a href="{{ product.get_absolute_url }}">
+									<span class="onsale">ویژه!</span>
+								</a>
+								<span class="product-thumb-info border-0">
+{#									<a href="shop-cart.html" class="add-to-cart-product bg-color-primary">#}
+{#										<span class="text-1">افزودن به سبد</span>#}
+{#									</a>#}
+									<a href="{{ product.get_absolute_url }}">
+										<span class="product-thumb-info-image">
+											<img alt="" class="img-fluid" src="{{ product.images.first.file.url }}">
+										</span>
+									</a>
+									<span class="product-thumb-info-content product-thumb-info-content pl-0 bg-color-light">
+										<a href="{{ product.get_absolute_url }}">
+											<h4 class="text-4 text-primary">{{ product.name }}</h4>
+											<span class="price">
+												<del><span class="amount">{{ product.price }} تومان</span></del>
+												<ins><span class="amount text-dark font-weight-semibold">{{ product.new_price }} تومان</span></ins>
+											</span>
+										</a>
+									</span>
+								</span>
+							</div>
+                            {% endfor %}
+
+						</div>
+
+					</div>
+
+				</div>
+
+			</div>
+    {% comment %}
+    بلوک نمایش Pagination.
+    متغیر 'products' باید همان page_obj باشد که از View می‌آید.
+    این کد تضمین می‌کند که فیلترهای اعمال شده در URL (manufacturer, memory, etc.) حفظ شوند.
+{% endcomment %}
+
+{% if products.has_other_pages %}
+<nav aria-label="Pagination Navigation" class="mt-4">
+    <ul class="pagination justify-content-center flex-wrap shadow-lg rounded-lg p-2 bg-white">
+
+        <!-- دکمه صفحه قبلی -->
+        {% if products.has_previous %}
+            <li class="page-item">
+                {# request.GET.urlencode تمام پارامترهای فیلتر را حفظ می‌کند #}
+                <a class="page-link text-primary hover:bg-gray-100 transition duration-150 ease-in-out"
+                   href="?{{ request.GET.urlencode|safe }}&page={{ products.previous_page_number }}"
+                   aria-label="قبلی">
+                    <span aria-hidden="true">&larr;</span>
+                </a>
+            </li>
+        {% else %}
+            <li class="page-item disabled">
+                <span class="page-link text-gray-400" aria-hidden="true">&larr;</span>
+            </li>
+        {% endif %}
+
+        <!-- نمایش صفحات -->
+        {% for i in products.paginator.page_range %}
+
+            {# نمایش فقط 2 صفحه قبل و 2 صفحه بعد از صفحه فعلی برای تمیزی UI #}
+            {% if products.number == i %}
+                <!-- صفحه فعلی (فعال) -->
+                <li class="page-item active" aria-current="page">
+                    <span class="page-link bg-primary border-primary text-white">{{ i }}</span>
+                </li>
+            {% elif i > products.number|add:'-3' and i < products.number|add:'3' %}
+                <!-- صفحات نزدیک -->
+                <li class="page-item">
+                    <a class="page-link text-primary hover:bg-gray-100 transition duration-150 ease-in-out"
+                       href="?{{ request.GET.urlencode|safe }}&page={{ i }}">
+                       {{ i }}
+                    </a>
+                </li>
+            {% endif %}
+        {% endfor %}
+
+        <!-- دکمه صفحه بعدی -->
+        {% if products.has_next %}
+            <li class="page-item">
+                <a class="page-link text-primary hover:bg-gray-100 transition duration-150 ease-in-out"
+                   href="?{{ request.GET.urlencode|safe }}&page={{ products.next_page_number }}"
+                   aria-label="بعدی">
+                    <span aria-hidden="true">&rarr;</span>
+                </a>
+            </li>
+        {% else %}
+            <li class="page-item disabled">
+                <span class="page-link text-gray-400" aria-hidden="true">&rarr;</span>
+            </li>
+        {% endif %}
+
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}
+</html>

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="fa">
+{% extends 'parent/base.html' %}
+{% load static %}
+{% block title %}جزئیات محصول{% endblock %}
+
+{% block content %}
+
+		<div class="body">
+
+			<div role="main" class="main shop pt-4">
+
+				<div class="container">
+
+					<div class="row">
+						<div class="col-lg-6">
+
+							<div class="" data-plugin-options="{'items': 1}">
+                                {% for img in product.images.all %}
+								<div>
+									<img alt="" class="img-fluid" src="{{ img.file.url }} ">
+								</div>
+                                    <span>
+                                    {{ product.features.memory }}
+                                    </span>
+
+                                {% endfor %}
+
+							</div>
+
+						</div>
+
+						<div class="col-lg-6">
+
+							<div class="summary entry-summary">
+
+								<h1 class="mb-2 font-weight-bold text-7">{{ product.name }}</h1>
+
+								<div class="py-1 clearfix">
+									<div title="Rated 3 out of 5" class="float-left">
+										<input type="text" class="d-none" value="3" title="" data-plugin-star-rating data-plugin-options="{'displayOnly': true, 'color': 'primary', 'size':'xs', 'language':'fa'}" data-rtl="true">
+									</div>
+
+
+								</div>
+
+								<p class="price">
+                                    <del><span class="amount">{{ product.price }} تومان</span></del>
+									<span class="amount text-dark font-weight-semibold">{{ product.new_price }} تومان</span>
+								</p>
+
+								<p class="mb-4">موجودی: {{ product.inventory }}</p>
+									<div class="quantity quantity-lg">
+										<input type="button" class="minus" value="-">
+										<input type="text" class="input-text qty text" title="Qty" value="1" name="quantity" id="id-quantity" min="1" step="1">
+										<input type="button" class="plus" value="+">
+									</div>
+                                {% if count %}
+                                    <button type="button" class="btn btn-primary btn-modern text-uppercase mb-4" id="add-cart" disabled>فاقد موجودی</button>
+                                {% endif %}
+                            {% comment %} ----------------------------------------------------- {% endcomment %}
+
+        <div class="product-meta mb-4">
+            <h5 class="text-uppercase mb-2 font-weight-bold">مشخصات کلیدی</h5>
+
+            {% with features=product.features.first %}
+            {% if features %}
+            <ul class="list list-unstyled list-borders">
+                <li>
+                    <strong class="text-dark">تولید کننده:</strong>
+                    {{ features.get_manufacturer_display }}
+                </li>
+                <li>
+                    <strong class="text-dark">حافظه گرافیکی (VRAM):</strong>
+                    {{ features.memory }} GB
+                </li>
+                <li>
+                    <strong class="text-dark">توان مصرفی (TDP):</strong>
+                    {{ features.tdp }} وات
+                </li>
+                <li>
+                    <strong class="text-dark">طول کارت:</strong>
+                    {{ features.card_length }} میلی‌متر
+                </li>
+                <li>
+                    <strong class="text-dark">وضوح پیشنهادی:</strong>
+                    {{ features.get_suggested_resolution_display }}
+                </li>
+                <li>
+                    <strong class="text-dark">رابط (Interface):</strong>
+                    PCIe {{ features.interface }}
+                </li>
+            </ul>
+            {% else %}
+            <p>اطلاعات فنی برای این محصول موجود نیست.</p>
+            {% endif %}
+            {% endwith %}
+        </div>
+
+        {% comment %} ----------------------------------------------------- {% endcomment %}
+                                    <button type="button" class="btn btn-primary btn-modern text-uppercase mb-4" id="add-cart">افزودن به سبد</button>
+
+								<div class="product-meta">
+									<span class="posted-in">دسته ها: <a rel="tag" href="#">{{ product.category }}</a></span>
+								</div>
+
+
+							</div>
+
+
+						</div>
+					</div>
+
+					<div class="row">
+						<div class="col">
+							<div class="tabs tabs-product mb-2">
+								<ul class="nav nav-tabs d-block d-sm-flex">
+									<li class="nav-item active"><a class="nav-link py-3 px-4" href="#productDescription" data-toggle="tab">توضیحات</a></li>
+								</ul>
+								<div class="tab-content p-0">
+									<div class="tab-pane p-4 active" id="productDescription">
+										<p>{{ product.description }}</p>
+									</div>
+
+								</div>
+							</div>
+						</div>
+					</div>
+
+				</div>
+
+			</div>
+
+		</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script>
+    $(document).ready(function(){
+        $('#add-cart').click(function(){
+            var button = $(this);
+            var quantity = document.getElementById('id-quantity').value;
+
+            $.ajax({
+               type: 'POST',
+               url: '{% url 'cart:add_to_cart' product.id %}',
+               data:{
+                   'csrfmiddlewaretoken':'{{ csrf_token }}',
+                    'quantity': quantity,
+               },
+               success: function(data) {
+                   $('#item_count').text(data.item_count);
+                   $('#total_price').text(data.total_price);
+                   if (data.cart_count === true) {
+                       $('#add-cart').attr('disabled', true);
+                       $('#add-cart').text('فاقد موجودی');
+                   }
+               },
+            });
+        });
+    });
+
+   $(document).ready(function(){
+    // ... کد AJAX شما در اینجا قرار دارد ...
+
+    // 💡 منطق جدید برای دکمه‌های مثبت و منفی
+    $('.plus').click(function() {
+        var quantityInput = $('#id-quantity');
+        var currentVal = parseInt(quantityInput.val());
+        var maxVal = quantityInput.attr('max');
+
+        // اگر حداکثر تعریف شده یا نامشخص بود و عدد معتبر بود
+        if (!isNaN(currentVal) && (maxVal === undefined || currentVal < parseInt(maxVal))) {
+            quantityInput.val(currentVal + 1);
+        }
+    });
+
+    $('.minus').click(function() {
+        var quantityInput = $('#id-quantity');
+        var currentVal = parseInt(quantityInput.val());
+        var minVal = parseInt(quantityInput.attr('min'));
+
+        // اگر عدد معتبر بود و بیشتر از حداقل مجاز بود
+        if (!isNaN(currentVal) && currentVal > minVal) {
+            quantityInput.val(currentVal - 1);
+        }
+    });
+});
+</script>
+
+{% endblock %}
+</html>
