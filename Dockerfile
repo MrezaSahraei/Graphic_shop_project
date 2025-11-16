@@ -1,17 +1,16 @@
-# مرحله اول: استفاده از یک تصویر پایه
-FROM python:3.10-slim
+FROM python:3.13-slim
 
-# تعیین دایرکتوری کاری
-WORKDIR /usr/src/app
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
 
-# کپی کردن فایل نیازمندی‌ها و نصب آن‌ها
-COPY requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt
+WORKDIR /code
 
-# کپی کردن بقیه کدهای پروژه
-COPY . .
+COPY requirements.txt .
+RUN pip install --upgrade pip
+RUN pip install -r requirements.txt
 
-# اگر پورت 8000 را استفاده می‌کنید
+COPY . /code/
+
 EXPOSE 8000
 
-# دستور اجرای برنامه (بسته به پروژه شما ممکن است فرق کند)
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
