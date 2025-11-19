@@ -1,7 +1,8 @@
 from django.shortcuts import render, get_object_or_404
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from .models import *
-
+from django.shortcuts import render, get_object_or_404
+from .models import Product, Category, ProductFeature  
 
 # Create your views here.
 def index(request):
@@ -23,16 +24,11 @@ def product_list(request, category_slug=None):
     resolution_filter = request.GET.get('resolution')
     pcie_filter = request.GET.get('pcie')
 
-    # فیلتر بر اساس سازنده
     if manufacturer_filter:
-        # فیلتر کردن بر اساس سازنده که در مدل ProductFeature قرار دارد
         products = products.filter(features__manufacturer=manufacturer_filter)
-        # 💡 features__manufacturer: از related_name='features' برای دسترسی به فیلد manufacturer استفاده شده است
 
-    # فیلتر بر اساس رم
     if memory_filter:
         try:
-            # رم (memory) یک PositiveIntegerField است
             memory_filter = int(memory_filter)
             products = products.filter(features__memory=memory_filter)
         except:
@@ -43,11 +39,8 @@ def product_list(request, category_slug=None):
 
     if pcie_filter:
         products.filter(features__interface=pcie_filter)
-    # ----------------------------------------------------
 
-    # 4. آماده‌سازی Context برای فرم جستجو در HTML
 
-    # الف) لیست سازنده‌ها (از فیلد choices مدل ProductFeature می‌آید)
     manufacturer_choices = ProductFeature.MANUFACTURER
     resolution_choices = ProductFeature.SUGGESTED_RESOLUTION
     interface_choices = ProductFeature.PCIE_INTERFACES
@@ -82,7 +75,6 @@ def product_detail(request, id, slug):
     return render(request, 'shop/detail.html', context)
 
 
-from django.shortcuts import render, get_object_or_404
-from .models import Product, Category, ProductFeature  # 💡 ProductFeature را ایمپورت کنید
+
 
 
