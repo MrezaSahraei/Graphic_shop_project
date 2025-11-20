@@ -85,7 +85,7 @@ class ProductFeature(models.Model):
     MANUFACTURER = (
     ('NVIDIA', 'NVIDIA'),
     ('AMD', 'AMD'),
-    ('OTHER', 'OTHER')
+    ('Others', 'Others')
     )
     SUGGESTED_RESOLUTION = (
     ('720', '720'),
@@ -100,7 +100,25 @@ class ProductFeature(models.Model):
     ('4.0','4.0'),
     ('5.0', '5.0')
     )
-
+    VRAM_TYPES = (
+    ('GDDR3', 'GDDR3'),
+    ('GDDR5', 'GDDR5'),
+    ('GDDR6', 'GDDR6'),
+    ('GDDR6X', 'GDDR6X'),
+    ('GDDR7', 'GDDR7'),
+    ('Others', 'Others')
+    )
+    GRAPHICS_CARD_BRANDS = (
+    ('ASUS', 'ASUS'),
+    ('INTEL', 'INTEL'),
+    ('MSI', 'MSI'),
+    ('GIGABYTE', 'GIGABYTE'),
+    ('EVGA', 'EVGA'),
+    ('ZOTAC', 'ZOTAC'),
+    ('SAPPHIRE', 'SAPPHIRE'),
+    ('XFX', 'XFX'),
+    ('Others', 'Others')
+    )
     product = models.ForeignKey(Product, related_name='features', on_delete=models.CASCADE)
     memory = models.PositiveIntegerField(default=0)
     card_length = models.PositiveIntegerField(default=0)
@@ -108,5 +126,7 @@ class ProductFeature(models.Model):
     interface = models.CharField(choices=PCIE_INTERFACES, default='2.0')
     tdp = models.PositiveIntegerField(default=0)
     suggested_resolution = models.CharField(max_length=20, choices=SUGGESTED_RESOLUTION, default='720')
+    memory_types = models.CharField(max_length=20, choices=VRAM_TYPES, default='GDDR6')
+    brands = models.CharField(max_length=20, choices=GRAPHICS_CARD_BRANDS, default='Others')
 
 

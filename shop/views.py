@@ -22,17 +22,14 @@ def product_list(request, category_slug=None):
     memory_filter = request.GET.get('memory')
     resolution_filter = request.GET.get('resolution')
     pcie_filter = request.GET.get('pcie')
+    memory_types_filter = request.GET.get('memory_types')
+    brands_filter = request.GET.get('brands')
 
-    # فیلتر بر اساس سازنده
     if manufacturer_filter:
-        # فیلتر کردن بر اساس سازنده که در مدل ProductFeature قرار دارد
         products = products.filter(features__manufacturer=manufacturer_filter)
-        # 💡 features__manufacturer: از related_name='features' برای دسترسی به فیلد manufacturer استفاده شده است
 
-    # فیلتر بر اساس رم
     if memory_filter:
         try:
-            # رم (memory) یک PositiveIntegerField است
             memory_filter = int(memory_filter)
             products = products.filter(features__memory=memory_filter)
         except:
@@ -43,15 +40,19 @@ def product_list(request, category_slug=None):
 
     if pcie_filter:
         products.filter(features__interface=pcie_filter)
-    # ----------------------------------------------------
 
-    # 4. آماده‌سازی Context برای فرم جستجو در HTML
+    if memory_types_filter:
+        products = Product.objects.filter(features__memory_types=memory_types_filter)
 
-    # الف) لیست سازنده‌ها (از فیلد choices مدل ProductFeature می‌آید)
+    if brands_filter:
+        products = Product.objects.filter(features__brands=brands_filter)
+
     manufacturer_choices = ProductFeature.MANUFACTURER
     resolution_choices = ProductFeature.SUGGESTED_RESOLUTION
     interface_choices = ProductFeature.PCIE_INTERFACES
     available_memory = ProductFeature.objects.values_list('memory', flat=True).distinct().order_by('memory')
+    memory_types_choices = ProductFeature.VRAM_TYPES
+    brands_choices = ProductFeature.GRAPHICS_CARD_BRANDS
 
     paginator = Paginator(products,1)
     page_number = request.GET.get('page', 1)
@@ -71,7 +72,11 @@ def product_list(request, category_slug=None):
         'resolution_choices': resolution_choices,
         'selected_resolution':resolution_filter,
         'interface_choices': interface_choices,
-        'selected_interface': pcie_filter
+        'selected_interface': pcie_filter,
+        'memory_types_choices': memory_types_choices,
+        'selected_memory_types': memory_types_filter,
+        'brands_choices': brands_choices,
+        'selected_brands': brands_filter
 
     }
 

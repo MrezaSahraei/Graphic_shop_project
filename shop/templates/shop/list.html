@@ -21,19 +21,16 @@
         <!-- متن عنوان -->
         جستجو و فیلتر
 
-        <!-- آیکون فلش (برای نشان دادن حالت باز/بسته) -->
         <i class="fas fa-chevron-down float-left mr-auto"></i>
 
     </a>
 
-    <!-- محتوای فیلترها (در حالت پیش‌فرض بسته است به خاطر کلاس collapse) -->
     <div class="collapse" id="product-filters">
 
         <form method="GET" action="{% url 'shop:product_list' %}">
 
-            <!-- فیلتر سازنده -->
             <div class="mb-3">
-                <label for="manufacturer-select" class="form-label">شرکت سازنده:</label>
+                <label for="manufacturer-select" class="form-label">شرکت سازنده چیپ گرافیکی:</label>
                 <select name="manufacturer" id="manufacturer-select" class="form-control">
                     <option value="">همه </option>
                     {% for code, label in manufacturer_choices %}
@@ -44,10 +41,21 @@
                     {% endfor %}
                 </select>
             </div>
+                    <div class="mb-3">
+                <label for="brands-select" class="form-label">برند سازنده:</label>
+                <select name="brands" id="brands-select" class="form-control">
+                    <option value="">همه </option>
+                    {% for code, label in brands_choices %}
+                        <option value="{{ code }}"
+                            {% if code == selected_brands %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
 
-            <!-- فیلتر مقدار حافظه (GB) -->
             <div class="mb-3">
-                <label for="memory-select" class="form-label">مقدار حافظه (GB):</label>
+                <label for="memory-select" class="form-label">مقدار VRAM (GB):</label>
                 <select name="memory" id="memory-select" class="form-control">
                     <option value="">همه</option>
                     {% for memory_val in available_memory %}
@@ -59,7 +67,19 @@
                 </select>
             </div>
 
-            <!-- فیلتر رزولوشن پیشنهادی -->
+            <div class="mb-3">
+                <label for="memory-types-select" class="form-label">نوع VRAM :</label>
+                <select name="memory-types" id="memory-types-select" class="form-control">
+                    <option value="">همه </option>
+                    {% for code, label in memory_types_choices %}
+                        <option value="{{ code }}"
+                            {% if code == selected_memory_types %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
             <div class="mb-3">
                 <label for="resolution-choices" class="form-label">رزولوشن پیشنهادی:</label>
                 <select name="resolution" id="resolution-choices" class="form-control">
