@@ -108,7 +108,7 @@ class ProductFeature(models.Model):
     ('GDDR7', 'GDDR7'),
     ('Others', 'Others')
     )
-    GRAPHICS_CARD_BRANDS = (
+    GRAPHIC_CARDS_BRANDS = (
     ('ASUS', 'ASUS'),
     ('INTEL', 'INTEL'),
     ('MSI', 'MSI'),
@@ -127,6 +127,6 @@ class ProductFeature(models.Model):
     tdp = models.PositiveIntegerField(default=0)
     suggested_resolution = models.CharField(max_length=20, choices=SUGGESTED_RESOLUTION, default='720')
     memory_types = models.CharField(max_length=20, choices=VRAM_TYPES, default='GDDR6')
-    brands = models.CharField(max_length=20, choices=GRAPHICS_CARD_BRANDS, default='Others')
+    brands = models.CharField(max_length=20, choices=GRAPHIC_CARDS_BRANDS, default='Others')
 
 
