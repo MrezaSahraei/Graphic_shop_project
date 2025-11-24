@@ -1,5 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from pyexpat import features
+
 from .models import *
 
 
@@ -7,14 +9,13 @@ from .models import *
 def index(request):
     return render(request, 'shop/index.html')
 
-
 def product_list(request, category_slug=None):
     products = Product.objects.select_related('category').all()
 
     category = None
     if category_slug:
         category = get_object_or_404(Category, slug=category_slug)
-        products = products.filter(category=category)
+        products = Product.objects.select_related('category').filter(category=category)
 
     #search logic
 
@@ -22,6 +23,8 @@ def product_list(request, category_slug=None):
     memory_filter = request.GET.get('memory')
     resolution_filter = request.GET.get('resolution')
     pcie_filter = request.GET.get('pcie')
+    memory_types_filter = request.GET.get('memory_types')
+    brands_filter = request.GET.get('brands')
 
     if manufacturer_filter:
         products = products.filter(features__manufacturer=manufacturer_filter)
@@ -31,18 +34,27 @@ def product_list(request, category_slug=None):
             memory_filter = int(memory_filter)
             products = products.filter(features__memory=memory_filter)
         except:
-            ValueError('مقدار معتبری وارد کنید.')
+            ValueError('مقداری برای نمایش وجود ندارد')
 
     if resolution_filter:
         products = products.filter(features__suggested_resolution=resolution_filter)
 
     if pcie_filter:
-        products.filter(features__interface=pcie_filter)
+        products = products.filter(features__interface=pcie_filter)
+
+    if memory_types_filter:
+        products = products.filter(features__memory_types=memory_types_filter)
+
+    if brands_filter:
+        products = products.filter(features__brands=brands_filter)
+
 
     manufacturer_choices = ProductFeature.MANUFACTURER
     resolution_choices = ProductFeature.SUGGESTED_RESOLUTION
     interface_choices = ProductFeature.PCIE_INTERFACES
     available_memory = ProductFeature.objects.values_list('memory', flat=True).distinct().order_by('memory')
+    memory_types_choices = ProductFeature.VRAM_TYPES
+    brands_choices = ProductFeature.GRAPHIC_CARDS_BRANDS
 
     paginator = Paginator(products,1)
     page_number = request.GET.get('page', 1)
@@ -62,7 +74,11 @@ def product_list(request, category_slug=None):
         'resolution_choices': resolution_choices,
         'selected_resolution':resolution_filter,
         'interface_choices': interface_choices,
-        'selected_interface': pcie_filter
+        'selected_interface': pcie_filter,
+        'memory_types_choices': memory_types_choices,
+        'selected_memory_types': memory_types_filter,
+        'brands_choices': brands_choices,
+        'selected_brands': brands_filter
 
     }
 
@@ -73,7 +89,5 @@ def product_detail(request, id, slug):
     return render(request, 'shop/detail.html', context)
 
 
-from django.shortcuts import render, get_object_or_404
-from .models import Product, Category, ProductFeature  # 💡 ProductFeature را ایمپورت کنید
 
 
